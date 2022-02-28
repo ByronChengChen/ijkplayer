@@ -1181,6 +1181,8 @@ static void stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_by
     }
 }
 
+//TODO: chengk 1. 这里如何暂停视频的？
+//!!!: ck info 暂停 3. ffplay处理暂停
 /* pause or resume the video */
 static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
@@ -1484,17 +1486,17 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
                                    frame_format,
                                    ffp->vout);
-#ifdef FFP_MERGE
-    if (vp->format == AV_PIX_FMT_YUV420P)
-        sdl_format = SDL_PIXELFORMAT_YV12;
-    else
-        sdl_format = SDL_PIXELFORMAT_ARGB8888;
-
-    if (realloc_texture(&vp->bmp, sdl_format, vp->width, vp->height, SDL_BLENDMODE_NONE, 0) < 0) {
-#else
+//#ifdef FFP_MERGE
+//    if (vp->format == AV_PIX_FMT_YUV420P)
+//        sdl_format = SDL_PIXELFORMAT_YV12;
+//    else
+//        sdl_format = SDL_PIXELFORMAT_ARGB8888;
+//
+//    if (realloc_texture(&vp->bmp, sdl_format, vp->width, vp->height, SDL_BLENDMODE_NONE, 0) < 0) {
+//#else
     /* RV16, RV32 contains only one plane */
     if (!vp->bmp || (!vp->bmp->is_private && vp->bmp->pitches[0] < vp->width)) {
-#endif
+//#endif
         /* SDL allocates a buffer smaller than requested if the video
          * overlay hardware is unable to support the requested size. */
         av_log(NULL, AV_LOG_FATAL,
@@ -2363,11 +2365,11 @@ static int subtitle_thread(void *arg)
             break;
 
         pts = 0;
-#ifdef FFP_MERGE
-        if (got_subtitle && sp->sub.format == 0) {
-#else
+//#ifdef FFP_MERGE
+//        if (got_subtitle && sp->sub.format == 0) {
+//#else
         if (got_subtitle) {
-#endif
+//#endif
             if (sp->sub.pts != AV_NOPTS_VALUE)
                 pts = sp->sub.pts / (double)AV_TIME_BASE;
             sp->pts = pts;
@@ -3354,15 +3356,15 @@ static int read_thread(void *arg)
     for (;;) {
         if (is->abort_request)
             break;
-#ifdef FFP_MERGE
-        if (is->paused != is->last_paused) {
-            is->last_paused = is->paused;
-            if (is->paused)
-                is->read_pause_return = av_read_pause(ic);
-            else
-                av_read_play(ic);
-        }
-#endif
+//#ifdef FFP_MERGE
+//        if (is->paused != is->last_paused) {
+//            is->last_paused = is->paused;
+//            if (is->paused)
+//                is->read_pause_return = av_read_pause(ic);
+//            else
+//                av_read_play(ic);
+//        }
+//#endif
 #if CONFIG_RTSP_DEMUXER || CONFIG_MMSH_PROTOCOL
         if (is->paused &&
                 (!strcmp(ic->iformat->name, "rtsp") ||
@@ -3466,11 +3468,11 @@ static int read_thread(void *arg)
 
         /* if the queue are full, no need to read more */
         if (ffp->infinite_buffer<1 && !is->seek_req &&
-#ifdef FFP_MERGE
-              (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
-#else
+//#ifdef FFP_MERGE
+//              (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
+//#else
               (is->audioq.size + is->videoq.size + is->subtitleq.size > ffp->dcc.max_buffer_size
-#endif
+//#endif
             || (   stream_has_enough_packets(is->audio_st, is->audio_stream, &is->audioq, MIN_FRAMES)
                 && stream_has_enough_packets(is->video_st, is->video_stream, &is->videoq, MIN_FRAMES)
                 && stream_has_enough_packets(is->subtitle_st, is->subtitle_stream, &is->subtitleq, MIN_FRAMES)))) {
